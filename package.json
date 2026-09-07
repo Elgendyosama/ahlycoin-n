@@ -16,13 +16,11 @@
     "apps/*",
     "packages/*"
   ],
-  "devDependencies": {
-    "typescript": "^5.4.5"
-  },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "turbo": "^2.10.12"
+    "turbo": "^2.10.12",
+    "typescript": "^5.4.5"
   }
 }
