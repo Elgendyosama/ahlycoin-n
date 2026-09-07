@@ -5,7 +5,7 @@
   "packageManager": "npm@10.9.8",
   "scripts": {
     "dev": "turbo dev",
-    "build": "npx turbo run build",
+    "build": "npx prisma generate --schema=./packages/database/prisma/schema.prisma && npx turbo run build --filter=@sports-social/api",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "db:generate": "turbo run db:generate",

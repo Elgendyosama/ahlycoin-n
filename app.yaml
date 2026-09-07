@@ -1,6 +1,0 @@
-version: 2
-build:
-  builder: npm
-run:
-  startCommand: node apps/api/dist/server.js
-  port: 4000
