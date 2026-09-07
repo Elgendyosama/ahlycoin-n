@@ -1,0 +1,181 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  HALFTIME
+  FINISHED
+  CANCELLED
+}
+
+enum MatchEventType {
+  GOAL
+  YELLOW_CARD
+  RED_CARD
+  SUBSTITUTION
+  VAR
+  PERIOD_START
+  PERIOD_END
+}
+
+model User {
+  id             String    @id @default(uuid())
+  username       String    @unique
+  email          String    @unique
+  passwordHash   String
+  name           String
+  avatarUrl      String?
+  bio            String?
+  role           Role      @default(USER)
+  isBanned       Boolean   @default(false)
+  isVerified     Boolean   @default(false)
+  favoriteTeamId String?
+  favoriteTeam   Team?     @relation(fields: [favoriteTeamId], references: [id])
+  
+  posts          Post[]
+  likes          Like[]
+  comments       Comment[]
+  chats          MatchChat[]
+  reports        Report[]
+
+  following      Follow[]  @relation("UserFollowing")
+  followers      Follow[]  @relation("UserFollowers")
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  follower    User   @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User   @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+}
+
+model Team {
+  id             String   @id @default(uuid())
+  name           String   @unique
+  shortName      String
+  code           String   @unique
+  logoUrl        String
+  primaryColor   String   @default("#000000")
+  secondaryColor String   @default("#FFFFFF")
+
+  homeMatches    Match[]  @relation("HomeTeam")
+  awayMatches    Match[]  @relation("AwayTeam")
+  events         MatchEvent[]
+  fans           User[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Match {
+  id         String      @id @default(uuid())
+  homeTeamId String
+  awayTeamId String
+  homeTeam   Team        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam   Team        @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeScore  Int         @default(0)
+  awayScore  Int         @default(0)
+  status     MatchStatus @default(SCHEDULED)
+  minute     Int         @default(0)
+  startTime  DateTime
+  venue      String
+  league     String
+
+  events     MatchEvent[]
+  posts      Post[]
+  chats      MatchChat[]
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model MatchEvent {
+  id          String         @id @default(uuid())
+  matchId     String
+  match       Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  type        MatchEventType
+  minute      Int
+  teamId      String
+  team        Team           @relation(fields: [teamId], references: [id])
+  player      String
+  assistPlayer String?
+  description String
+  createdAt   DateTime       @default(now())
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  mediaUrls String[]  @default([])
+  matchId   String?
+  match     Match?    @relation(fields: [matchId], references: [id], onDelete: SetNull)
+
+  likes     Like[]
+  comments  Comment[]
+  reports   Report[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model MatchChat {
+  id        String   @id @default(uuid())
+  matchId   String
+  userId    String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reason     String
+  postId     String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
