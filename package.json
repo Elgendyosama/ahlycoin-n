@@ -2,6 +2,7 @@
   "name": "sports-social-monorepo",
   "private": true,
   "version": "1.0.0",
+  "packageManager": "npm@10.9.8",
   "scripts": {
     "dev": "turbo dev",
     "build": "npx turbo run build",
