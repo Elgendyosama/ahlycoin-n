@@ -1,7 +1,6 @@
 version: 2
 build:
   builder: npm
-  buildCommand: npx prisma generate --schema=./packages/database/prisma/schema.prisma && npx turbo run build --filter=@sports-social/api
 run:
   startCommand: node apps/api/dist/server.js
   port: 4000
