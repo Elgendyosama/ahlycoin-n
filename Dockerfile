@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# تثبيت مكتبات OpenSSL و libc6-compat اللازمة لعمل Prisma على Alpine
+RUN apk add --no-cache openssl libc6-compat
+
 # نسخ ملفات المشروع بالكامل
 COPY . .
 
