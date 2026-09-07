@@ -11,6 +11,9 @@ RUN npm install
 # توليد Prisma Client
 RUN npx prisma generate --schema=./packages/database/prisma/schema.prisma
 
+# ترجمة حزمة قاعدة البيانات أولاً من TS إلى JS داخل مجلد dist
+RUN npx tsc -p packages/database
+
 # بناء الـ API فقط عبر Turbo
 RUN npx turbo run build --filter=@sports-social/api
 
